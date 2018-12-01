@@ -65,8 +65,9 @@ func ProcessInput(input inputs.Input) {
 		} else {
 			err := executeCommands(items)
 			if err != nil {
-				fmt.Println("\n ------ done ------")
+				exit("Apply alias failed: %v", err)
 			}
+			fmt.Println("\n ------ done ------")
 		}
 
 	case inputs.SYNC:
