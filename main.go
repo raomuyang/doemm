@@ -74,20 +74,17 @@ func getInput() (input inputs.Input, err error) {
 			if len(*alias) != 0 {
 				return nil, errors.New("-alias with -print is forbid")
 			}
-			p := inputs.PrintParam{Target: *printItems}
-			input = &p
+			input = &inputs.PrintParam{Target: *printItems}
 			return
 		} else if *switchTo != "" {
 			// switch the specified command(s)
 			if len(*alias) != 0 {
 				return nil, errors.New("-alias with -s is forbid")
 			}
-			s := inputs.SwitchParam{Target: *switchTo}
-			input = &s
+			input = &inputs.SwitchParam{Target: *switchTo}
 			return
 		} else if *list {
-			listInput := inputs.ListParam{}
-			input = &listInput
+			input = &inputs.ListParam{}
 			return
 		} else {
 			// store commands

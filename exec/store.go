@@ -59,14 +59,14 @@ func show(alias string) (res []string, err error) {
 
 	in, err := ioutil.ReadFile(filePath)
 	if err != nil {
-		return res, err
+		return
 	}
 	content := string(in)
 	if strings.HasSuffix(filePath, encryptSuffix) {
 		content, err = decryptText(string(content), SK)
 		if err != nil {
 			log.Warn("Failed to decrypt content, cause: %v", err)
-			return res, err
+			return
 		}
 	}
 
