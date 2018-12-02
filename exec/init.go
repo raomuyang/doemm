@@ -32,7 +32,7 @@ func init() {
 	}
 
 	userHome = current.HomeDir
-	appHome = userHome + "/.do_emm"
+	appHome = userHome + "/.doemm"
 	configPath = appHome + "/configuration.yml"
 	bucketDir = appHome + "/bucket"
 	scriptTmpDir = appHome + "/scripts"
