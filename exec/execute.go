@@ -1,15 +1,18 @@
 package exec
 
 import (
+	"encoding/hex"
+	"fmt"
 	"github.com/pkg/errors"
-	"github.com/satori/go.uuid"
 	log "github.com/sirupsen/logrus"
 	"io/ioutil"
+	"math/rand"
 	"os"
 	"os/exec"
 	"path"
 	"runtime"
 	"strings"
+	"time"
 )
 
 func run(alias string) error {
@@ -34,7 +37,7 @@ func run(alias string) error {
 }
 
 func runShell(alias string, items []string) error {
-	tmpPath := path.Join(scriptTmpDir, alias+".emm.tmp"+uuid.NewV1().String())
+	tmpPath := path.Join(scriptTmpDir, alias+".emm.tmp"+getTmpId())
 
 	content := "#!/usr/bin/env bash\n" + strings.Join(items, "\n")
 
@@ -56,7 +59,7 @@ func runShell(alias string, items []string) error {
 }
 
 func runBat(alias string, items []string) error {
-	tmpPath := path.Join(scriptTmpDir, alias+".emm.tmp."+uuid.NewV1().String()+".bat")
+	tmpPath := path.Join(scriptTmpDir, alias+".emm.tmp."+getTmpId()+".bat")
 
 	content := strings.Join(items, "\r\n")
 
@@ -105,4 +108,11 @@ func getCommand(args []string) *exec.Cmd {
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
 	return cmd
+}
+
+func getTmpId() string {
+
+	now := time.Now()
+	id := fmt.Sprintf("%s-rand-%f", now.String(), rand.Float32())
+	return hex.EncodeToString([]byte(id))
 }
