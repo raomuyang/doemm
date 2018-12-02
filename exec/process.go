@@ -34,12 +34,13 @@ func ProcessInput(input inputs.Input) {
 	case inputs.CONFIG:
 		fmt.Printf("////// update local configuration //////\n\n")
 		processConfig(input.GetItems())
+		fmt.Println("-> done.")
 	case inputs.STORE:
 		err := save(input.GetItems(), input.GetSummary())
 		if err != nil {
 			exit("Failed to save commands: %v \n", err)
 		}
-		fmt.Println("item stored!")
+		fmt.Println("-> done.")
 	case inputs.LIST:
 		fmt.Printf("////// Stored list //////\n\n")
 		res, err := listAll()
@@ -75,14 +76,14 @@ func ProcessInput(input inputs.Input) {
 		if err != nil {
 			exit("Error: pull failed: %v \n", err)
 		}
-		fmt.Println("////// pull item(s) done.")
+		fmt.Println("-> done.")
 	case inputs.PUSH:
 		fmt.Printf("////// push item(s) to gist! //////\n\n")
 		err := push(input.GetSummary())
 		if err != nil {
 			exit("Error: push failed: %v \n", err)
 		}
-		fmt.Println("////// pull item(s) done.")
+		fmt.Println("-> done.")
 	case inputs.DELETE:
 		fmt.Printf("////// delete item: %s //////\n\n", input.GetSummary())
 
@@ -101,6 +102,7 @@ func ProcessInput(input inputs.Input) {
 		if err != nil {
 			exit("Failed to delete from local: %v\n", err)
 		}
+		fmt.Println("-> done.")
 	}
 }
 

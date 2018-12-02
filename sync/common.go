@@ -70,7 +70,7 @@ func PullSingleFile(token string, targetFile string, possibleSuffix string, gist
 
 	targetFileWithSuffix := targetFile + possibleSuffix
 	for name, fileInfo := range files {
-		if strings.Compare(targetFile, name) != 0 ||
+		if strings.Compare(targetFile, name) != 0 &&
 			strings.Compare(targetFileWithSuffix, name) != 0 {
 			continue
 		}
