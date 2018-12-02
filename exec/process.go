@@ -31,9 +31,13 @@ type Configuration struct {
 func ProcessInput(input inputs.Input) {
 	switch input.GetInputType() {
 	case inputs.CONFIG:
+		fmt.Println("////// update local configuration //////")
 		processConfig(input.GetItems())
 	case inputs.STORE:
-		save(input.GetItems(), input.GetSummary())
+		err := save(input.GetItems(), input.GetSummary())
+		if err != nil {
+			exit("Failed to save commands: %v", err)
+		}
 		fmt.Println("item stored!")
 	case inputs.LIST:
 		fmt.Printf("////// Stored list //////\n\n")
@@ -57,32 +61,27 @@ func ProcessInput(input inputs.Input) {
 			}
 		}
 	case inputs.SWITCH:
-		fmt.Printf("------ switch alias %s ------ \n\n", input.GetSummary())
-		items, err := show(input.GetSummary())
+		log.Infof("////// switch alias %s ////// \n\n", input.GetSummary())
+		err := run(input.GetSummary())
 		if err != nil {
-			exit("Failed to load item: %v", err)
+			exit("Apply alias failed: %v", err)
 		}
-
-		if len(items) == 0 {
-			fmt.Println("Not found!")
-		} else {
-			err := executeCommands(items)
-			if err != nil {
-				exit("Apply alias failed: %v", err)
-			}
-			fmt.Println("\n ------ done ------")
-		}
+		log.Infof("\n ------ done ------")
 
 	case inputs.PULL:
+		fmt.Println("////// pull item(s) from gist! //////")
 		err := pull(input.GetSummary())
 		if err != nil {
 			exit("Error: pull failed: %v", err)
 		}
+		fmt.Println("////// pull item(s) done.")
 	case inputs.PUSH:
+		fmt.Println("////// push item(s) to gist! //////")
 		err := push(input.GetSummary())
 		if err != nil {
 			exit("Error: push failed: %v", err)
 		}
+		fmt.Println("////// pull item(s) done.")
 	}
 }
 

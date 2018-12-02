@@ -117,7 +117,7 @@ func pull(fileName string) (err error) {
 		}
 		err = sync.PullSingleFile(configuration.GistToken, fileName, encryptSuffix, gistInfo, mapNameToLocal)
 	}
-	fmt.Println("////// pull item(s) done.")
+
 	return
 }
 
@@ -164,6 +164,6 @@ func push(itemName string) (err error) {
 		gistInfo, err = sync.PushSingleFile(configuration.GistToken, filePath, gistId)
 		dumpGist(gistInfo)
 	}
-	fmt.Println("////// pull item(s) done.")
+
 	return
 }

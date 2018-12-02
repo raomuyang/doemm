@@ -51,7 +51,6 @@ func getInput() (input inputs.Input, err error) {
 
 	switch os.Args[1] {
 	case CONFIG:
-		fmt.Println("update local configuration")
 		err := configCommand.Parse(os.Args[2:])
 		if err != nil {
 			printDefaultAndExit(err)
@@ -59,7 +58,7 @@ func getInput() (input inputs.Input, err error) {
 		c := inputs.ConfigParams{GistToken: *gistToken, Encrypt: *defaultEncrypt}
 		input = &c
 	case PULL:
-		fmt.Println("pull item(s) from gist!")
+
 		err := pullCommand.Parse(os.Args[2:])
 		if err != nil {
 			printDefaultAndExit(err)
@@ -67,7 +66,7 @@ func getInput() (input inputs.Input, err error) {
 		s := inputs.PullParams{SingleItem: *pullSingleFile}
 		input = &s
 	case PUSH:
-		fmt.Println("push item(s) to gist!")
+
 		err := pushCommand.Parse(os.Args[2:])
 		if err != nil {
 			printDefaultAndExit(err)
