@@ -65,11 +65,13 @@ func PullFiles(token string, gistInfo *GistInfo, f MapToPath) error {
 	return nil
 }
 
-func PullSingleFile(token string, targetFile string, gistInfo *GistInfo, f MapToPath) error {
+func PullSingleFile(token string, targetFile string, possibleSuffix string, gistInfo *GistInfo, f MapToPath) error {
 	files := gistInfo.Files
 
+	targetFileWithSuffix := targetFile + possibleSuffix
 	for name, fileInfo := range files {
-		if strings.Compare(targetFile, name) != 0 {
+		if strings.Compare(targetFile, name) != 0 ||
+			strings.Compare(targetFileWithSuffix, name) != 0 {
 			continue
 		}
 
@@ -89,10 +91,10 @@ func PullSingleFile(token string, targetFile string, gistInfo *GistInfo, f MapTo
 				return e
 			}
 		}
-		break
+		return nil
 	}
 
-	return nil
+	return errors.Errorf("not found such item: %s", targetFile)
 }
 
 func PushLocalFiles(token string, pathList []string, gistId string) (gistInfo *GistInfo, err error) {
@@ -127,6 +129,8 @@ func readFile(path string) (content *FileContent, err error) {
 	if err != nil {
 		return
 	}
+	defer file.Close()
+
 	data, err := ioutil.ReadAll(file)
 	if err != nil {
 		return

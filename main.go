@@ -11,23 +11,26 @@ import (
 
 const (
 	CONFIG = "config"
-	SYNC   = "sync"
+	PULL   = "pull"
+	PUSH   = "push"
 )
 
 var (
 	help       = flag.Bool("help", false, "print help")
 	switchTo   = flag.String("s", "", "switch to the specified commands-alias")
 	printItems = flag.String("print", "", "print the specified commands-alias")
-	alias      = flag.String("alias", "", "set alias of store command(s)")
+	alias      = flag.String("alias", "", "set the alias of store command(s)")
 	list       = flag.Bool("list", false, "list the saved commands")
 
 	configCommand  = flag.NewFlagSet("config", flag.ExitOnError)
 	gistToken      = configCommand.String("gist", "", "gist token")
 	defaultEncrypt = configCommand.Bool("encrypt", false, "default encrypt your command items")
 
-	syncCommand = flag.NewFlagSet("sync", flag.ExitOnError)
-	publicGist  = syncCommand.Bool("public", false, "sync saved operations to an open public gist item")
-	singleItem  = syncCommand.String("single", "", "select a single item to sync")
+	pullCommand    = flag.NewFlagSet("pull", flag.ExitOnError)
+	pullSingleFile = pullCommand.String("single", "", "select a single item to pull")
+
+	pushCommand    = flag.NewFlagSet("push", flag.ExitOnError)
+	pushSingleFile = pushCommand.String("single", "", "select a single item to push")
 )
 
 func main() {
@@ -55,15 +58,22 @@ func getInput() (input inputs.Input, err error) {
 		}
 		c := inputs.ConfigParams{GistToken: *gistToken, Encrypt: *defaultEncrypt}
 		input = &c
-	case SYNC:
-		fmt.Println("Synchronous local files to gist!")
-		err := syncCommand.Parse(os.Args[2:])
+	case PULL:
+		fmt.Println("pull item(s) from gist!")
+		err := pullCommand.Parse(os.Args[2:])
 		if err != nil {
 			printDefaultAndExit(err)
 		}
-		s := inputs.SyncParams{Public: *publicGist, SingleItem: *singleItem}
+		s := inputs.PullParams{SingleItem: *pullSingleFile}
 		input = &s
-
+	case PUSH:
+		fmt.Println("push item(s) to gist!")
+		err := pushCommand.Parse(os.Args[2:])
+		if err != nil {
+			printDefaultAndExit(err)
+		}
+		s := inputs.PushParams{SingleItem: *pushSingleFile}
+		input = &s
 	default:
 		flag.Parse()
 		if *help {
@@ -113,12 +123,16 @@ func printDefaultAndExit(err error) {
 func printDefault() {
 
 	print("Usage:\n\n" +
-		"doeem -alias <command alias-name> <target command to save>\n" +
-		"doemm -s <commands-alias>\n\n")
+		"save the command:\n" +
+		"> doeem -alias <command alias> <target command to save>\n" +
+		"switch a specified command:\n" +
+		"> doemm -s <commands-alias>\n\n")
 	flag.PrintDefaults()
 
-	print("config: \n")
+	print("config: \n  write new config item into `config.yml`\n\n")
 	configCommand.PrintDefaults()
-	print("sync: \n")
-	syncCommand.PrintDefaults()
+	print("pull: \n  pull item(s) from gist.github.com\n  eg. pull [item-alias]\n\n")
+	pullCommand.PrintDefaults()
+	print("push: \n  push local item(s) to gist.github.com\n  eg. push [item-alias]\n\n")
+	pushCommand.PrintDefaults()
 }

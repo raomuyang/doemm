@@ -18,9 +18,12 @@ import (
 var SK = "Bj.Hd.MDYHyDl501"
 
 type Configuration struct {
-	Gist           string `yaml:"gist"`
-	DefaultEncrypt bool   `yaml:"default_encrypt"`
-
+	// gist (github) oauth token
+	GistToken string `yaml:"gist_token"`
+	// id of gist which store the items
+	GistId string `yaml:"gist_id"`
+	// hidden the commands, default false
+	DefaultEncrypt bool `yaml:"default_encrypt"`
 	// DEBUG(5) INFO(4) WARN(3) ERROR(2) FATAL(1) PANIC(0)
 	LogLevel uint32 `yaml:"log_level"`
 }
@@ -70,8 +73,16 @@ func ProcessInput(input inputs.Input) {
 			fmt.Println("\n ------ done ------")
 		}
 
-	case inputs.SYNC:
-
+	case inputs.PULL:
+		err := pull(input.GetSummary())
+		if err != nil {
+			exit("Error: pull failed: %v", err)
+		}
+	case inputs.PUSH:
+		err := push(input.GetSummary())
+		if err != nil {
+			exit("Error: push failed: %v", err)
+		}
 	}
 }
 
@@ -83,7 +94,7 @@ func processConfig(items []string) {
 		encrypt = true
 	}
 
-	configuration.Gist = gistToken
+	configuration.GistToken = gistToken
 	configuration.DefaultEncrypt = encrypt
 	dumpConfiguration()
 	fmt.Printf("emm... encrypt: %v \ndone!\n", encrypt)

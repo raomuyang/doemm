@@ -19,22 +19,37 @@ func (input *ConfigParams) GetSummary() string {
 	return ""
 }
 
-type SyncParams struct {
-	// create a public gist
-	Public bool
+type PullParams struct {
 	// select a single item to sync
 	SingleItem string
 }
 
-func (input *SyncParams) GetItems() []string {
-	return []string{fmt.Sprintf("%v", input.Public)}
+func (input *PullParams) GetItems() []string {
+	return []string{}
 }
 
-func (input *SyncParams) GetInputType() InputType {
-	return SYNC
+func (input *PullParams) GetInputType() InputType {
+	return PULL
 }
 
-func (input *SyncParams) GetSummary() string {
+func (input *PullParams) GetSummary() string {
+	return input.SingleItem
+}
+
+type PushParams struct {
+	// select a single item to sync
+	SingleItem string
+}
+
+func (input *PushParams) GetItems() []string {
+	return []string{}
+}
+
+func (input *PushParams) GetInputType() InputType {
+	return PUSH
+}
+
+func (input *PushParams) GetSummary() string {
 	return input.SingleItem
 }
 

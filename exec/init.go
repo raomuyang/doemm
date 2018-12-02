@@ -72,7 +72,7 @@ func getDefaultConfig() Configuration {
 	return Configuration{
 		LogLevel:       3,
 		DefaultEncrypt: false,
-		Gist:           defaultGithubOAuthToken}
+		GistToken:      defaultGithubOAuthToken}
 }
 
 func initLogger() {

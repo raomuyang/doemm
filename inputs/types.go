@@ -5,7 +5,8 @@ type InputType int
 const (
 	STORE InputType = iota
 	CONFIG
-	SYNC
+	PULL
+	PUSH
 	SWITCH
 	LIST
 	PRINT
