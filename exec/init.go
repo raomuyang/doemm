@@ -18,6 +18,7 @@ var (
 	appHome       string
 	configPath    string
 	bucketDir     string
+	scriptTmpDir  string
 	logLevel      log.Level
 	configuration Configuration
 )
@@ -34,10 +35,15 @@ func init() {
 	appHome = userHome + "/.do_emm"
 	configPath = appHome + "/configuration.yml"
 	bucketDir = appHome + "/bucket"
+	scriptTmpDir = appHome + "/scripts"
 
 	_, err = os.Stat(bucketDir)
 	if err != nil {
 		os.MkdirAll(bucketDir, 0755)
+	}
+	_, err = os.Stat(scriptTmpDir)
+	if err != nil {
+		os.MkdirAll(scriptTmpDir, 0755)
 	}
 
 	_, err = os.Stat(configPath)

@@ -34,7 +34,7 @@ func run(alias string) error {
 }
 
 func runShell(alias string, items []string) error {
-	tmpPath := path.Join(bucketDir, alias+".emm.tmp"+uuid.NewV1().String())
+	tmpPath := path.Join(scriptTmpDir, alias+".emm.tmp"+uuid.NewV1().String())
 
 	content := "#!/usr/bin/env bash\n" + strings.Join(items, "\n")
 
@@ -56,7 +56,7 @@ func runShell(alias string, items []string) error {
 }
 
 func runBat(alias string, items []string) error {
-	tmpPath := path.Join(bucketDir, alias+".emm.tmp."+uuid.NewV1().String()+".bat")
+	tmpPath := path.Join(scriptTmpDir, alias+".emm.tmp."+uuid.NewV1().String()+".bat")
 
 	content := strings.Join(items, "\r\n")
 

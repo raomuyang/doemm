@@ -1,6 +1,7 @@
 package exec
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"github.com/pkg/errors"
@@ -28,7 +29,22 @@ const (
 )
 
 func mapNameToLocal(name string) string {
-	return path.Join(bucketDir, name)
+	fmt.Printf("new: %s\n", name)
+	local := path.Join(bucketDir, name)
+	old := getConflictName(local)
+	e := os.Remove(old)
+	log.Debugf("try to remove local old file: %v", e)
+	return local
+}
+
+func getConflictName(name string) string {
+	var conflictName string
+	if strings.HasSuffix(name, encryptSuffix) {
+		conflictName = name[:len(name)-len(encryptSuffix)]
+	} else {
+		conflictName = name + encryptSuffix
+	}
+	return conflictName
 }
 
 func initGist() (*sync.GistInfo, error) {
@@ -131,18 +147,53 @@ func push(itemName string) (err error) {
 		return
 	}
 	if len(itemName) == 0 {
-		var fileList []os.FileInfo
-		fileList, err = ioutil.ReadDir(bucketDir)
+		var fInfoList []os.FileInfo
+		fInfoList, err = ioutil.ReadDir(bucketDir)
+		if err != nil {
+			return
+		}
+
+		var gistInfo *sync.GistInfo
+
+		gistInfo, err = sync.GetGistInfo(configuration.GistToken, gistId)
 		if err != nil {
 			return
 		}
 
 		var pathList []string
-		for _, info := range fileList {
-			pathList = append(pathList, path.Join(bucketDir, info.Name()))
+		for _, info := range fInfoList {
+
+			local := path.Join(bucketDir, info.Name())
+
+			// append local
+			var f *sync.FileInfo
+			f = gistInfo.Files[info.Name()]
+			if f == nil || len(f.Content) != f.Size {
+				// not exists
+				fmt.Printf("new:    %s\n", info.Name())
+				pathList = append(pathList, local)
+			} else {
+				// not equal
+				data, _ := ioutil.ReadFile(local)
+				equal := bytes.Compare(data, []byte(f.Content)) == 0
+				if !equal {
+					fmt.Printf("new: %s\n", info.Name())
+					pathList = append(pathList, local)
+				}
+				log.Infof("check equal with local: %v", equal)
+			}
+
+			// command-alias.e 和 command-alias 不能同时保留，必须删除其中一个
+			// 程序传入一个不存在的相对路径，在同步时若content为空，gist会删除该文件
+			uniqueConflict := getConflictName(info.Name())
+			f = gistInfo.Files[uniqueConflict]
+			if f != nil {
+				fmt.Printf("delete: %s\n", uniqueConflict)
+				pathList = append(pathList, uniqueConflict)
+				log.Debugf("local: %s, unique check: %s", info.Name(), uniqueConflict)
+			}
 		}
 
-		var gistInfo *sync.GistInfo
 		gistInfo, err = sync.PushLocalFiles(configuration.GistToken, pathList, gistId)
 		if err != nil {
 			return
@@ -161,7 +212,19 @@ func push(itemName string) (err error) {
 			}
 		}
 
-		gistInfo, err = sync.PushSingleFile(configuration.GistToken, filePath, gistId)
+		var g *sync.GistInfo
+		g, err = sync.PushSingleFile(configuration.GistToken, filePath, gistId)
+		if err != nil {
+			return
+		}
+		gistInfo = g
+
+		duplicatePath := getConflictName(filePath)
+		g, err = sync.PushSingleFile(configuration.GistToken, duplicatePath, gistId)
+		log.Debugf("Try to delete exists file: %s, result: %v", duplicatePath, err)
+		if err == nil {
+			gistInfo = g
+		}
 		dumpGist(gistInfo)
 	}
 

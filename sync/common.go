@@ -109,6 +109,9 @@ func PushLocalFiles(token string, pathList []string, gistId string) (gistInfo *G
 		gist.Files[name] = content
 	}
 	gistInfo, err = UpdateGistInfo(token, &gist, gistId)
+	if err != nil {
+		log.Warnf("This error maybe cause set a nil content to a not exists file: %v", err)
+	}
 	return
 }
 
@@ -124,7 +127,16 @@ func PushSingleFile(token string, path string, gistId string) (gistInfo *GistInf
 	return
 }
 
+// 文件不存在时返回一个空的内容
 func readFile(path string) (content *FileContent, err error) {
+	stat, e := os.Stat(path)
+
+	// 文件为相对路径时，可能会读取到同名的目录，不取任何内容，将content置为空
+	if e != nil || stat.IsDir() {
+		log.Infof("delete file content: %s", path)
+		return
+	}
+
 	file, err := os.Open(path)
 	if err != nil {
 		return
