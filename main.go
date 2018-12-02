@@ -14,6 +14,13 @@ const (
 	PULL   = "pull"
 	PUSH   = "push"
 	DELETE = "rm"
+	APP    = "\n" +
+		"______         _____                    \n" +
+		"|  _  \\       |  ___|                   \n" +
+		"| | | |___    | |__ _ __ ___  _ __ ___  \n" +
+		"| | | / _ \\   |  __| '_ ` _ \\| '_ ` _ \\ \n" +
+		"| |/ / (_) | _| |__| | | | | | | | | | |\n" +
+		"|___/ \\___(_|_)____/_| |_| |_|_| |_| |_|\n"
 )
 
 var (
@@ -88,6 +95,7 @@ func getInput() (input inputs.Input, err error) {
 	default:
 		flag.Parse()
 		if *help {
+			println(APP)
 			printDefault()
 			os.Exit(0)
 		} else if *printItems != "" {
