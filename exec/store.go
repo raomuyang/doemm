@@ -43,19 +43,10 @@ func save(commands []string, alias string) error {
 // 读取保存的命令行内容，默认先找未加密保存的内容，其次再尝试读取加密保存的内容
 func show(alias string) (res []string, err error) {
 
-	filePath := path.Join(bucketDir, alias)
-	stat, err := os.Stat(filePath)
+	filePath, err := findLocal(alias)
 	if err != nil {
-		filePath += encryptSuffix
-		stat, err = os.Stat(filePath)
-		if err != nil {
-			// not found
-			log.Warn("alias not found: %s, %v", alias, err)
-			return
-		}
+		return
 	}
-
-	log.Infof("State file: %s: %v", filePath, stat)
 
 	in, err := ioutil.ReadFile(filePath)
 	if err != nil {
@@ -89,8 +80,36 @@ func listAll() ([]string, error) {
 			name = name[:len(name)-len(encryptSuffix)]
 		}
 
-		item := fmt.Sprintf("%s  -  %v", name, time)
+		item := fmt.Sprintf("%s  -  %v\n", name, time)
 		res = append(res, item)
 	}
 	return res, nil
+}
+
+func deleteLocal(alias string) error {
+	filePath, err := findLocal(alias)
+	if err != nil {
+		return err
+	}
+	err = os.Remove(filePath)
+	if err == nil {
+		fmt.Println("-> local deleted")
+	}
+	return err
+}
+
+func findLocal(alias string) (filePath string, err error) {
+	filePath = path.Join(bucketDir, alias)
+	stat, err := os.Stat(filePath)
+	if err != nil {
+		filePath += encryptSuffix
+		stat, err = os.Stat(filePath)
+		if err != nil {
+			// not found
+			log.Warn("alias not found: %s, %v", alias, err)
+			return
+		}
+	}
+	log.Infof("State file: %s: %v", filePath, stat)
+	return
 }

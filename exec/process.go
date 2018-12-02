@@ -13,6 +13,7 @@ import (
 	"io"
 	"io/ioutil"
 	"os"
+	"path"
 )
 
 var SK = "Bj.Hd.MDYHyDl501"
@@ -31,19 +32,19 @@ type Configuration struct {
 func ProcessInput(input inputs.Input) {
 	switch input.GetInputType() {
 	case inputs.CONFIG:
-		fmt.Println("////// update local configuration //////")
+		fmt.Printf("////// update local configuration //////\n\n")
 		processConfig(input.GetItems())
 	case inputs.STORE:
 		err := save(input.GetItems(), input.GetSummary())
 		if err != nil {
-			exit("Failed to save commands: %v", err)
+			exit("Failed to save commands: %v \n", err)
 		}
 		fmt.Println("item stored!")
 	case inputs.LIST:
 		fmt.Printf("////// Stored list //////\n\n")
 		res, err := listAll()
 		if err != nil {
-			exit("Failed to list, cause: %v", err)
+			exit("Failed to list, cause: %v \n", err)
 		}
 		for i, item := range res {
 			fmt.Printf("%d. %s", i, item)
@@ -51,7 +52,7 @@ func ProcessInput(input inputs.Input) {
 	case inputs.PRINT:
 		items, err := show(input.GetSummary())
 		if err != nil {
-			exit("Failed to load item: %v", err)
+			exit("Failed to load item: %v \n", err)
 		}
 		if len(items) == 0 {
 			fmt.Println("Not found!")
@@ -64,24 +65,42 @@ func ProcessInput(input inputs.Input) {
 		log.Infof("////// switch alias %s ////// \n\n", input.GetSummary())
 		err := run(input.GetSummary())
 		if err != nil {
-			exit("Apply alias failed: %v", err)
+			exit("Apply alias failed: %v \n", err)
 		}
 		log.Infof("\n ------ done ------")
 
 	case inputs.PULL:
-		fmt.Println("////// pull item(s) from gist! //////")
+		fmt.Printf("////// pull item(s) from gist! //////\n\n")
 		err := pull(input.GetSummary())
 		if err != nil {
-			exit("Error: pull failed: %v", err)
+			exit("Error: pull failed: %v \n", err)
 		}
 		fmt.Println("////// pull item(s) done.")
 	case inputs.PUSH:
-		fmt.Println("////// push item(s) to gist! //////")
+		fmt.Printf("////// push item(s) to gist! //////\n\n")
 		err := push(input.GetSummary())
 		if err != nil {
-			exit("Error: push failed: %v", err)
+			exit("Error: push failed: %v \n", err)
 		}
 		fmt.Println("////// pull item(s) done.")
+	case inputs.DELETE:
+		fmt.Printf("////// delete item: %s //////\n\n", input.GetSummary())
+
+		realPath, err := findLocal(input.GetSummary())
+		if err != nil {
+			exit("Error: %v \n", err)
+		}
+		realAlias := path.Base(realPath)
+		if len(input.GetItems()) == 1 {
+			err := deleteRemote(realAlias)
+			if err != nil {
+				exit("Failed to delete from remote: %v \n", err)
+			}
+		}
+		err = deleteLocal(realAlias)
+		if err != nil {
+			exit("Failed to delete from local: %v\n", err)
+		}
 	}
 }
 

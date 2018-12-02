@@ -63,13 +63,13 @@ func initConfigYml(createNew bool) {
 	if createNew {
 		err := dumpConfiguration()
 		if err != nil {
-			exit("Error: create default yaml file failed, cause: %s", err)
+			exit("Error: create default yaml file failed, cause: %s\n", err)
 		}
 		log.Info("Initial configuration file by default")
 	} else {
 		err := loadConfiguration()
 		if err != nil {
-			exit("Error: read configuration failed: %v", err)
+			exit("Error: read configuration failed: %v\n", err)
 		}
 	}
 }
@@ -89,7 +89,7 @@ func initLogger() {
 
 	file, err := os.OpenFile(filePath, os.O_CREATE|os.O_APPEND|os.O_RDWR, 0766)
 	if err != nil {
-		exit("Error: create log file failed, cause: %s", err)
+		exit("Error: create log file failed, cause: %s\n", err)
 	}
 	log.SetOutput(file)
 }

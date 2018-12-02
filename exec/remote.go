@@ -29,7 +29,7 @@ const (
 )
 
 func mapNameToLocal(name string) string {
-	fmt.Printf("new: %s\n", name)
+	fmt.Printf("-> new: %s\n", name)
 	local := path.Join(bucketDir, name)
 	old := getConflictName(local)
 	e := os.Remove(old)
@@ -170,14 +170,14 @@ func push(itemName string) (err error) {
 			f = gistInfo.Files[info.Name()]
 			if f == nil || len(f.Content) != f.Size {
 				// not exists
-				fmt.Printf("new:    %s\n", info.Name())
+				fmt.Printf("-> new:    %s\n", info.Name())
 				pathList = append(pathList, local)
 			} else {
 				// not equal
 				data, _ := ioutil.ReadFile(local)
 				equal := bytes.Compare(data, []byte(f.Content)) == 0
 				if !equal {
-					fmt.Printf("new: %s\n", info.Name())
+					fmt.Printf("-> new: %s\n", info.Name())
 					pathList = append(pathList, local)
 				}
 				log.Infof("check equal with local: %v", equal)
@@ -188,7 +188,7 @@ func push(itemName string) (err error) {
 			uniqueConflict := getConflictName(info.Name())
 			f = gistInfo.Files[uniqueConflict]
 			if f != nil {
-				fmt.Printf("delete: %s\n", uniqueConflict)
+				fmt.Printf("-> delete: %s\n", uniqueConflict)
 				pathList = append(pathList, uniqueConflict)
 				log.Debugf("local: %s, unique check: %s", info.Name(), uniqueConflict)
 			}
@@ -212,6 +212,7 @@ func push(itemName string) (err error) {
 			}
 		}
 
+		fmt.Printf("-> put: %s \n", itemName)
 		var g *sync.GistInfo
 		g, err = sync.PushSingleFile(configuration.GistToken, filePath, gistId)
 		if err != nil {
@@ -220,13 +221,30 @@ func push(itemName string) (err error) {
 		gistInfo = g
 
 		duplicatePath := getConflictName(filePath)
-		g, err = sync.PushSingleFile(configuration.GistToken, duplicatePath, gistId)
+		g, e = sync.PushSingleFile(configuration.GistToken, duplicatePath, gistId)
 		log.Debugf("Try to delete exists file: %s, result: %v", duplicatePath, err)
-		if err == nil {
+		if e == nil {
 			gistInfo = g
 		}
 		dumpGist(gistInfo)
 	}
 
 	return
+}
+
+func deleteRemote(alias string) error {
+	if len(configuration.GistToken) == 0 {
+		return errors.New("please config gist token via `doemm config -gist <gist token>`")
+	}
+	gistId, err := checkAndGetGistId()
+	if err != nil {
+		return err
+	}
+	g, err := sync.PushSingleFile(configuration.GistToken, alias, gistId)
+	if err != nil {
+		return err
+	}
+	fmt.Println("-> remote deleted")
+	dumpGist(g)
+	return nil
 }

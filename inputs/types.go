@@ -10,6 +10,7 @@ const (
 	SWITCH
 	LIST
 	PRINT
+	DELETE
 )
 
 type Input interface {

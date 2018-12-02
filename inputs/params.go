@@ -99,3 +99,26 @@ func (input *ListParam) GetInputType() InputType {
 func (input *ListParam) GetSummary() string {
 	return ""
 }
+
+type DeleteParams struct {
+	// target to delete
+	Target string
+	// sync to gist
+	Sync bool
+}
+
+func (input *DeleteParams) GetItems() []string {
+	if input.Sync {
+		return []string{"true"}
+	} else {
+		return []string{}
+	}
+}
+
+func (input *DeleteParams) GetInputType() InputType {
+	return DELETE
+}
+
+func (input *DeleteParams) GetSummary() string {
+	return input.Target
+}

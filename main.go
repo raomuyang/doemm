@@ -13,6 +13,7 @@ const (
 	CONFIG = "config"
 	PULL   = "pull"
 	PUSH   = "push"
+	DELETE = "rm"
 )
 
 var (
@@ -22,15 +23,19 @@ var (
 	alias      = flag.String("alias", "", "set the alias of store command(s)")
 	list       = flag.Bool("list", false, "list the saved commands")
 
-	configCommand  = flag.NewFlagSet("config", flag.ExitOnError)
+	configCommand  = flag.NewFlagSet(CONFIG, flag.ExitOnError)
 	gistToken      = configCommand.String("gist", "", "gist token")
 	defaultEncrypt = configCommand.Bool("encrypt", false, "default encrypt your command items")
 
-	pullCommand    = flag.NewFlagSet("pull", flag.ExitOnError)
+	pullCommand    = flag.NewFlagSet(PULL, flag.ExitOnError)
 	pullSingleFile = pullCommand.String("single", "", "select a single item to pull")
 
-	pushCommand    = flag.NewFlagSet("push", flag.ExitOnError)
+	pushCommand    = flag.NewFlagSet(PUSH, flag.ExitOnError)
 	pushSingleFile = pushCommand.String("single", "", "select a single item to push")
+
+	deleteCommand = flag.NewFlagSet(DELETE, flag.ExitOnError)
+	deleteTarget  = deleteCommand.String("t", "", "specify the target command-alias to delete")
+	syncDelete    = deleteCommand.Bool("sync", false, "sync operation to remote")
 )
 
 func main() {
@@ -72,6 +77,13 @@ func getInput() (input inputs.Input, err error) {
 			printDefaultAndExit(err)
 		}
 		s := inputs.PushParams{SingleItem: *pushSingleFile}
+		input = &s
+	case DELETE:
+		err := deleteCommand.Parse(os.Args[2:])
+		if err != nil {
+			printDefaultAndExit(err)
+		}
+		s := inputs.DeleteParams{Target: *deleteTarget, Sync: *syncDelete}
 		input = &s
 	default:
 		flag.Parse()
@@ -128,10 +140,12 @@ func printDefault() {
 		"> doemm -s <commands-alias>\n\n")
 	flag.PrintDefaults()
 
-	print("config: \n  write new config item into `config.yml`\n\n")
+	print("config: \n  write new config item into `configuration.yml`\n\n")
 	configCommand.PrintDefaults()
 	print("pull: \n  pull item(s) from gist.github.com\n  eg. pull [item-alias]\n\n")
 	pullCommand.PrintDefaults()
 	print("push: \n  push local item(s) to gist.github.com\n  eg. push [item-alias]\n\n")
 	pushCommand.PrintDefaults()
+	print("rm: \b  delete local (and remote) items\n\n")
+	deleteCommand.PrintDefaults()
 }
